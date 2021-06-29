@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,7 +20,8 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     ArrayList<String > celeburl=new ArrayList<String>();
-    ArrayList<String>names=new ArrayList<String>();int chosen;
+    ArrayList<String>names=new ArrayList<String>();int chosen=0;
+    ImageView imageView;
     public class ImageDownloader extends AsyncTask<String,Void, Bitmap>{
 
 
@@ -68,17 +70,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DownloaTask task=new DownloaTask();
+        DownloaTask task=new DownloaTask();imageView=findViewById(R.id.imageView);
         String result=null;
         try {
             result=task.execute("https://commons.wikimedia.org/wiki/Category:Programming_language_logos").get();
             String[] splitResult =result.split("<form action=");
-            Pattern p=Pattern.compile("png\">(.*?)</a>");
+            Pattern p=Pattern.compile("href="(.*?)"");
             Matcher m =p.matcher(splitResult[0]);
             while(m.find()){
                 celeburl.add(m.group(1));
             }
-            p=Pattern.compile("a href=\"(.*?)\"");
+            p=Pattern.compile("png\">(.*?)</a>");
             m=p.matcher(splitResult[0]);
             while (m.find()){
                 names.add(m.group(1));
@@ -88,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
             chosen=random.nextInt(celeburl.size());
             ImageDownloader imagetask=new ImageDownloader();
             Bitmap celebimage=imagetask.execute(celeburl.get(chosen)).get();
+
+            imageView.setImageBitmap(celebimage);
         }catch (Exception e){
             e.printStackTrace();
         }
